@@ -10,9 +10,9 @@
 local select = {}
 
 function select.init(env)
-    local config = env.engine.schema.config
-    env.first_key = config:get_string('key_binder/select_first_character')
-    env.last_key = config:get_string('key_binder/select_last_character')
+    select.configuration = require('configuration').setup(env)
+    select.last_keys = select.configuration.select_character('last')
+    select.first_keys = select.configuration.select_character('first')
 end
 
 function select.func(key, env)
@@ -22,21 +22,55 @@ function select.func(key, env)
     if
         not key:release()
         and (context:is_composing() or context:has_menu())
-        and (env.first_key or env.last_key)
+        and (#select.first_keys > 0 or #select.last_keys > 0)
     then
         local input = context.input
         local selected_candidate = context:get_selected_candidate()
         selected_candidate = selected_candidate and selected_candidate.text or input
 
         local selected_char = ""
-        if (key:repr() == env.first_key) then
-            selected_char = selected_candidate:sub(1, utf8.offset(selected_candidate, 2) - 1)
-        elseif (key:repr() == env.last_key) then
+
+        -- 倒数 最后一个字需要特殊处理
+        if #select.last_keys > 1 and key:repr() == select.last_keys[#select.last_keys] then
+            -- 截取最后一个字
             selected_char = selected_candidate:sub(utf8.offset(selected_candidate, -1))
-        else
-            return 2
+        end
+        -- 倒数
+        for index = #select.last_keys - 1, 1, -1 do
+            if key:repr() == select.last_keys[index] then
+                if utf8.len(selected_candidate) <= #select.last_keys - index then
+                    -- 没有倒数第N个字, 截取第一个字
+                    selected_char = selected_candidate:sub(1, utf8.offset(selected_candidate, 2) - 1)
+                else
+                    -- 有倒数第N个字, 截取倒数第N个字
+                    selected_char = selected_candidate:sub(
+                        utf8.offset(selected_candidate, index - #select.last_keys - 1),
+                        utf8.offset(selected_candidate, index - #select.last_keys) - 1
+                    )
+                end
+                break
+            end
+        end
+        -- -- 正数
+        for index = 1, #select.first_keys + 1, 1 do
+            if key:repr() == select.first_keys[index] then
+                if utf8.len(selected_candidate) < index then
+                    -- 没有第N个字, 截取最后一个字
+                    selected_char = selected_candidate:sub(utf8.offset(selected_candidate, -1))
+                else
+                    -- 有第N个字, 截取第N个字
+                    selected_char = selected_candidate:sub(
+                        utf8.offset(selected_candidate, index),
+                        utf8.offset(selected_candidate, index + 1) - 1
+                    )
+                end
+                break
+            end
         end
 
+        if selected_char == "" then
+            return 2
+        end
         local commit_text = context:get_commit_text()
         local _, end_pos = commit_text:find(selected_candidate)
         local caret_pos = context.caret_pos

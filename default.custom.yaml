@@ -1,1 +1,15 @@
-
+patch:
+  schema_list:
+    - schema: double_pinyin
+  key_binder/+:
+    default:
+      select_character: 
+        first:
+          - comma   # 逗号, 定最左的字
+        last:
+          - period  # 句号. 定右数第2个字
+          - slash   # 斜杠/ 定最右的字
+  key_binder/bindings/+:
+    # 翻页 [ ]
+    - { when: has_menu, accept: bracketleft, send: Page_Up }
+    - { when: has_menu, accept: bracketright, send: Page_Down }
