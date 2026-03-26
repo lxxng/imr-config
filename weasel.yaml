@@ -61,7 +61,7 @@ style:
   label_font_point: 14                     # 标签字体字号，不设定 fallback 到 font_point
   comment_font_point: 13                   # 注释字体字号，不设定 fallback 到 font_point
 
-  inline_preedit: true                     # 行内显示预编辑区：true；false
+  inline_preedit: false                    # 行内显示预编辑区：true；false
   preedit_type: composition                # 预编辑区内容：composition（编码）； preview（选中的候选）；preview_all（全部候选）
 
   fullscreen: false                        # 候选窗口全屏显示：true；false
