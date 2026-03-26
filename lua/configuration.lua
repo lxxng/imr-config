@@ -42,7 +42,7 @@ end
 
 ---@param type 'first'|'last'
 function M.select_character(type)
-    if not (type == 'first') or not (type == 'last') then
+    if type ~= 'first' and type ~= 'last' then
         log.error('configuration.select_character(type = ' .. tostring(type) .. ') ==> input error')
         return nil
     end
