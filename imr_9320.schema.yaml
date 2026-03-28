@@ -131,25 +131,25 @@ speller:
 
 
     # 第三次击键选码
-    - derive/([qadgjmptx])([qadgjmptx])/$1$2①/
-    - derive/([qadgjmptx])([behknruyw])/$1$2②/
-    - derive/([qadgjmptx])([cfilosvz])/$1$2③/
-    - derive/([behknruyw])([qadgjmptx])/$1$2④/
-    - derive/([behknruyw])([behknruyw])/$1$2⑤/
-    - derive/([behknruyw])([cfilosvz])/$1$2⑥/
-    - derive/([cfilosvz])([qadgjmptx])/$1$2⑦/
-    - derive/([cfilosvz])([behknruyw])/$1$2⑧/
-    - derive/([cfilosvz])([cfilosvz])/$1$2⑨/
+    - xform/([qadgjmptx])([qadgjmptx])/$1$2①/
+    - xform/([qadgjmptx])([behknruyw])/$1$2②/
+    - xform/([qadgjmptx])([cfilosvz])/$1$2③/
+    - xform/([behknruyw])([qadgjmptx])/$1$2④/
+    - xform/([behknruyw])([behknruyw])/$1$2⑤/
+    - xform/([behknruyw])([cfilosvz])/$1$2⑥/
+    - xform/([cfilosvz])([qadgjmptx])/$1$2⑦/
+    - xform/([cfilosvz])([behknruyw])/$1$2⑧/
+    - xform/([cfilosvz])([cfilosvz])/$1$2⑨/
 
     # 九宫格数字映射
-    - derive/[qw]/①/
-    - derive/[abc]/②/
-    - derive/[def]/③/
-    - derive/[hgi]/④/
-    - derive/[jkl]/⑤/
-    - derive/[omn]/⑥/
-    - derive/[prs]/⑦/
-    - derive/[tuv]/⑧/
-    - derive/[xyz]/⑨/
+    - xform/[qw]/①/
+    - xform/[abc]/②/
+    - xform/[def]/③/
+    - xform/[hgi]/④/
+    - xform/[jkl]/⑤/
+    - xform/[omn]/⑥/
+    - xform/[prs]/⑦/
+    - xform/[tuv]/⑧/
+    - xform/[xyz]/⑨/
  
     - xlit/①②③④⑤⑥⑦⑧⑨/123456789/
