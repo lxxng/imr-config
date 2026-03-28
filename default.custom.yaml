@@ -10,6 +10,14 @@ patch:
         last:
           - period  # 句号. 定右数第2个字
           - slash   # 斜杠/ 定最右的字
+    hamster3:
+      select_character: # iOS 选字(需要配合皮肤改键)
+        first:
+          - KP_1
+          - KP_2
+        last:
+          - KP_8
+          - KP_9
   key_binder/bindings/+:
     # 翻页 [ ]
     - { when: has_menu, accept: bracketleft, send: Page_Up }

@@ -29,7 +29,6 @@ function select.func(key, env)
         selected_candidate = selected_candidate and selected_candidate.text or input
 
         local selected_char = ""
-
         -- 倒数 最后一个字需要特殊处理
         if #select.last_keys > 1 and key:repr() == select.last_keys[#select.last_keys] then
             -- 截取最后一个字
