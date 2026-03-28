@@ -138,18 +138,22 @@ speller:
 
 
     # 第三次击键选码
-    - xform/([qadgjmptx])([qadgjmptx])/$1$2①/
-    - xform/([qadgjmptx])([behknruyw])/$1$2②/
-    - xform/([qadgjmptx])([cfilosvz])/$1$2③/
-    - xform/([behknruyw])([qadgjmptx])/$1$2④/
-    - xform/([behknruyw])([behknruyw])/$1$2⑤/
-    - xform/([behknruyw])([cfilosvz])/$1$2⑥/
-    - xform/([cfilosvz])([qadgjmptx])/$1$2⑦/
-    - xform/([cfilosvz])([behknruyw])/$1$2⑧/
-    - xform/([cfilosvz])([cfilosvz])/$1$2⑨/
+    # 添加通配符
+    - abbrev/^([a-z]).+$/$1\*/
+    - abbrev/^.+([a-z])$/\*$1/
+
+    - xform/^([qadgjmptx])([qadgjmptx])$/$1$2①/
+    - xform/^([qadgjmptx])([behknruyw])$/$1$2②/
+    - xform/^([qadgjmptx])([*cfilosvz])$/$1$2③/
+    - xform/^([behknruyw])([qadgjmptx])$/$1$2④/
+    - xform/^([behknruyw])([behknruyw])$/$1$2⑤/
+    - xform/^([behknruyw])([*cfilosvz])$/$1$2⑥/
+    - xform/^([*cfilosvz])([qadgjmptx])$/$1$2⑦/
+    - xform/^([*cfilosvz])([behknruyw])$/$1$2⑧/
+    - xform/^([*cfilosvz])([*cfilosvz])$/$1$2⑨/
 
     # 九宫格数字映射
-    - xform/[qw]/①/
+    - xform/[qw*]/①/
     - xform/[abc]/②/
     - xform/[def]/③/
     - xform/[hgi]/④/
