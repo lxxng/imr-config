@@ -15,7 +15,7 @@ t9:
   #       如果想通过 lua 自己调整 preedit 的显示，可以设置为 true。
   # false: 根据候选字 comment 显示转换后的 preedit 内容。
   #        注意：请务必保证候选字 comment 有效且正确，否则可能导致预编辑文本显示异常。
-  isDisplayOriginalPreedit: false
+  isDisplayOriginalPreedit: true
 
 schema:
   schema_id: imr_9320
@@ -75,6 +75,13 @@ translator:
   prism: t9
   spelling_hints: 100
   comment_format: []
+
+  contextual_suggestions: true
+  max_homophones: 9
+  max_homographs: 7
+
+  # 显示原始输入
+  preedit_format: []
   # dictionary_exclude: [肏屄, 鸡巴]  # 如有屏蔽 NSFW 词汇需求 librime >= 1.14.0 等价于从 .dict.yaml 中删除对应词条，但不影响组句和用户词库。
 
 # 自定义短语：custom_phrase_t9.txt
@@ -153,3 +160,9 @@ speller:
     - xform/[xyz]/⑨/
  
     - xlit/①②③④⑤⑥⑦⑧⑨/123456789/
+grammar:
+  language: wanxiang-lts-zh-hans
+  collocation_max_length: 8
+  collocation_min_length: 3
+  collocation_penalty: -8
+  rear_penalty: -18
