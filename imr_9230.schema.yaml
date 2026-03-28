@@ -18,8 +18,8 @@ t9:
   isDisplayOriginalPreedit: true
 
 schema:
-  schema_id: imr_9320
-  name: "9320"
+  schema_id: imr_9230
+  name: IMR九键-9230
   version: "α"
   author:
     - Dvel
@@ -27,9 +27,10 @@ schema:
     - "[tong-zhi-qing-shao-dian-shui](https://www.zhihu.com/people/tong-zhi-qing-shao-dian-shui)"
     - "[lxxng](https://github.com/lxxng)"
   description: |
-    中文九(9)键 三(3)次击键 自然码双(2)拼 零(0)重码率
+    中文九(9)键双(2)拼 三(3)次击键 零(0)重码率
   dependencies:
     - melt_eng # 英文输入，作为次翻译器挂载到拼音方案
+    - imr_radical_9230
 
 engine:
   processors:
