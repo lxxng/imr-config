@@ -18,14 +18,16 @@ t9:
   isDisplayOriginalPreedit: false
 
 schema:
-  schema_id: t9
-  name: 中文九键
-  version: "3.0.0"
+  schema_id: imr_9320
+  name: "9320"
+  version: "α"
   author:
     - Dvel
     - "[morse.hsiao](https://github.com/imfuxiao)"
+    - "[tong-zhi-qing-shao-dian-shui](https://www.zhihu.com/people/tong-zhi-qing-shao-dian-shui)"
+    - "[lxxng](https://github.com/lxxng)"
   description: |
-    中文九键 for 仓输入法 & 元书输入法
+    中文九(9)键 三(3)次击键 自然码双(2)拼 零(0)重码率
   dependencies:
     - melt_eng # 英文输入，作为次翻译器挂载到拼音方案
 
@@ -92,34 +94,62 @@ punctuator:
     "@": [1, "@", ！, ：, 、, ……, ～]
     "#": [0, "#", "$", "%", "^", "&", "*", "(", ")"]
 
-# 输入时按 1 可以分词
-key_binder:
-  bindings:
-    - { when: has_menu, accept: 1, send: apostrophe }
-
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210=
   initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210=
   algebra:
-    # ### 超级简拼
-    - abbrev/^([a-z]).+$/$1/ # 超级简拼
-    - abbrev/^([zcs]h).+$/$1/ # 超级简拼中，zh ch sh 视为整体（ch'sh → 城市），而不是像这样分开（c'h's'h → 吃好睡好）。
-    - derive/^([nl])ve$/$1ue/
-    - derive/^([jqxy])u/$1v/
-    - derive/un$/uen/
-    - derive/ui$/uei/
-    - derive/iu$/iou/
-    - derive/([aeiou])ng$/$1gn/
-    - derive/([dtngkhrzcs])o(u|ng)$/$1o/
-    - derive/ong$/on/
-    - derive/ao$/oa/
-    - derive/([iu])a(o|ng?)$/a$1$2/
-    # ### 九宫格数字映射
-    - derive/[abc]/2/
-    - derive/[def]/3/
-    - derive/[hgi]/4/
-    - derive/[jkl]/5/
-    - derive/[omn]/6/
-    - derive/[pqrs]/7/
-    - derive/[tuv]/8/
-    - derive/[wxyz]/9/
+    - erase/^xx$/
+    - derive/^([jqxy])u$/$1v/
+    - derive/^([aoe])([ioun])$/$1$1$2/
+    - xform/^([aoe])(ng)?$/$1$1$2/
+    - xform/iu$/Ⓠ/
+    - xform/[iu]a$/Ⓦ/
+    - xform/[uv]an$/Ⓡ/
+    - xform/[uv]e$/Ⓣ/
+    - xform/ing$|uai$/Ⓨ/
+    - xform/^sh/Ⓤ/
+    - xform/^ch/Ⓘ/
+    - xform/^zh/Ⓥ/
+    - xform/uo$/Ⓞ/
+    - xform/[uv]n$/Ⓟ/
+    - xform/(.)i?ong$/$1Ⓢ/
+    - xform/[iu]ang$/Ⓓ/
+    - xform/(.)en$/$1Ⓕ/
+    - xform/(.)eng$/$1Ⓖ/
+    - xform/(.)ang$/$1Ⓗ/
+    - xform/ian$/Ⓜ/
+    - xform/(.)an$/$1Ⓙ/
+    - xform/iao$/Ⓒ/
+    - xform/(.)ao$/$1Ⓚ/
+    - xform/(.)ai$/$1Ⓛ/
+    - xform/(.)ei$/$1Ⓩ/
+    - xform/ie$/Ⓧ/
+    - xform/ui$/Ⓥ/
+    - xform/(.)ou$/$1Ⓑ/
+    - xform/in$/Ⓝ/
+    - xlit/ⓆⓌⓇⓉⓎⓊⒾⓄⓅⓈⒹⒻⒼⒽⓂⒿⒸⓀⓁⓏⓍⓋⒷⓃ/qwrtyuiopsdfghmjcklzxvbn/
+
+
+    # 第三次击键选码
+    - derive/([qadgjmptx])([qadgjmptx])/$1$2①/
+    - derive/([qadgjmptx])([behknruyw])/$1$2②/
+    - derive/([qadgjmptx])([cfilosvz])/$1$2③/
+    - derive/([behknruyw])([qadgjmptx])/$1$2④/
+    - derive/([behknruyw])([behknruyw])/$1$2⑤/
+    - derive/([behknruyw])([cfilosvz])/$1$2⑥/
+    - derive/([cfilosvz])([qadgjmptx])/$1$2⑦/
+    - derive/([cfilosvz])([behknruyw])/$1$2⑧/
+    - derive/([cfilosvz])([cfilosvz])/$1$2⑨/
+
+    # 九宫格数字映射
+    - derive/[qw]/①/
+    - derive/[abc]/②/
+    - derive/[def]/③/
+    - derive/[hgi]/④/
+    - derive/[jkl]/⑤/
+    - derive/[omn]/⑥/
+    - derive/[prs]/⑦/
+    - derive/[tuv]/⑧/
+    - derive/[xyz]/⑨/
+ 
+    - xlit/①②③④⑤⑥⑦⑧⑨/123456789/

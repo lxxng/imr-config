@@ -1,6 +1,7 @@
 patch:
   schema_list:
     - schema: double_pinyin
+    - schema: imr_9320
   key_binder/+:
     default:
       select_character: 
