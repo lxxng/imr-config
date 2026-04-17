@@ -15,17 +15,17 @@
 
 # 方案说明
 schema:
-  schema_id: double_pinyin_flypy
-  name: 小鹤双拼
-  version: "1"
+  schema_id: imr_double_pinyin
+  name: IMR-双拼
+  version: "alpha"
   author:
     - Dvel
   description: |
-    雾凇拼音 - 小鹤双拼
-    https://github.com/iDvel/rime-ice
+    自然码双拼
   dependencies:
     - melt_eng        # 英文输入，作为次翻译器挂载到拼音方案
-    - radical_pinyin  # 部件拆字，反查及辅码
+    - imr_double_pinyin_radical_pinyin     # 部件拆字，反查及辅码
+    - imr_double_pinyin_aux_code
 
 
 # 开关
@@ -52,7 +52,7 @@ switches:
 # 输入引擎
 engine:
   processors:
-    - lua_processor@*select_character  # 以词定字
+    - lua_processor@*imr.select_char*Processor
     - ascii_composer
     - recognizer
     - key_binder
@@ -71,6 +71,7 @@ engine:
   translators:
     - punct_translator
     - script_translator
+    - lua_translator@*imr.select_char*Translator
     - lua_translator@*date_translator    # 时间、日期、星期
     - lua_translator@*lunar              # 农历
     - lua_translator@*uuid               # UUID
@@ -90,7 +91,8 @@ engine:
     - lua_filter@*reduce_english_filter             # 降低部分英语单词在候选项的位置
     - simplifier@emoji                              # Emoji
     - simplifier@traditionalize                     # 简繁切换
-    - lua_filter@*search@radical_pinyin             # 部件拆字辅码
+    - lua_filter@*imr.aux_code
+    - lua_filter@*imr.select_char*Filter
     - uniquifier                                    # 去重
 
 
@@ -152,61 +154,25 @@ reduce_english_filter:
 # Lua 配置: 置顶候选项
 # 注释太长了，请参考 pin_cand_filter.lua 开头的说明书。
 pin_cand_filter:
-  # 格式：编码<Tab>字词1<Space>字词2……
-  - d	的
+  __include: imr_config:/pin_cand_filter/imr_double
 
 
 # 主翻译器，拼音
 translator:
   dictionary: rime_ice          # 挂载词库 rime_ice.dict.yaml
   enable_word_completion: true  # 大于 4 音节的词条自动补全，librime > 1.11.2
-  prism: double_pinyin_flypy    # 多方案共用一个词库时，为避免冲突，需要用 prism 指定一个名字。
+  prism: imr_double             # 多方案共用一个词库时，为避免冲突，需要用 prism 指定一个名字。
   spelling_hints: 8             # corrector.lua ：为了让错音错字提示的 Lua 同时适配全拼双拼，将拼音显示在 comment 中
-  always_show_comments: true    # corrector.lua ：Rime 默认在 preedit 等于 comment 时取消显示 comment，这里强制一直显示，供 corrector.lua 做判断用。
+  always_show_comments: false   # corrector.lua ：Rime 默认在 preedit 等于 comment 时取消显示 comment，这里强制一直显示，供 corrector.lua 做判断用。
   initial_quality: 1.2          # 拼音的权重应该比英文大
   comment_format:               # 标记拼音注释，供 corrector.lua 做判断用
     - xform/^/［/
     - xform/$/］/
-  preedit_format:               # preedit_format 影响到输入框的显示和“Shift+回车”上屏的字符
-    - xform/(^|[ '])aa/$1a/
-    - xform/(^|[ '])ee/$1e/
-    - xform/(^|[ '])oo/$1o/
-    - xform/([bpmfdtnljqx])n/$1iao/
-    - xform/(\w)g/$1eng/
-    - xform/(\w)q/$1iu/
-    - xform/(\w)w/$1ei/
-    - xform/([dtnlgkhjqxyvuirzcs])r/$1uan/
-    - xform/(\w)t/$1ve/
-    - xform/(\w)y/$1un/
-    - xform/([dtnlgkhvuirzcs])o/$1uo/
-    - xform/(\w)p/$1ie/
-    - xform/([jqx])s/$1iong/
-    - xform/(\w)s/$1ong/
-    - xform/(\w)d/$1ai/
-    - xform/(\w)f/$1en/
-    - xform/(\w)h/$1ang/
-    - xform/(\w)j/$1an/
-    - xform/([gkhvuirzcs])k/$1uai/
-    - xform/(\w)k/$1ing/
-    - xform/([jqxnlb])l/$1iang/
-    - xform/(\w)l/$1uang/
-    - xform/(\w)z/$1ou/
-    - xform/([gkhvuirzcs])x/$1ua/
-    - xform/(\w)x/$1ia/
-    - xform/(\w)c/$1ao/
-    - xform/([dtgkhvuirzcs])v/$1ui/
-    - xform/(\w)b/$1in/
-    - xform/(\w)m/$1ian/
-    - xform/([aoe])\1(\w)/$1$2/
-    - "xform/(^|[ '])v/$1zh/"
-    - "xform/(^|[ '])i/$1ch/"
-    - "xform/(^|[ '])u/$1sh/"
-    - xform/([jqxy])v/$1u/
-    - xform/([nl])v/$1ü/
-    - xform/ü/v/  # ü 显示为 v
-    - xform/(?<=[A-Z])\s(?=[A-Z])//  # 消除大写字母之间的空格
   # dictionary_exclude: [肏屄, 鸡巴]  # 如有屏蔽 NSFW 词汇需求 librime >= 1.14.0 等价于从 .dict.yaml 中删除对应词条，但不影响组句和用户词库。
 
+  contextual_suggestions: true
+  max_homophones: 9
+  max_homographs: 7
 
 # 次翻译器，英文
 melt_eng:
@@ -221,7 +187,7 @@ melt_eng:
 # 中英混合词汇
 cn_en:
   dictionary: ""
-  user_dict: en_dicts/cn_en_flypy
+  user_dict: en_dicts/cn_en_double_pinyin
   db_class: stabledb
   enable_completion: true
   enable_sentence: false
@@ -274,7 +240,7 @@ punctuator:
 # 部件拆字反查
 radical_lookup:
   tag: radical_lookup
-  dictionary: radical_pinyin
+  dictionary: imr_double_pinyin_radical_pinyin
   enable_user_dict: false
   prefix: "uU"  # 反查前缀（反查时前缀会消失影响打英文所以设定为两个字母，或可改成一个非字母符号），与 recognizer/patterns/radical_lookup 匹配
   tips: "  〔拆字〕"
@@ -333,34 +299,22 @@ speller:
   initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA
   delimiter: " '"  # 第一位<空格>是拼音之间的分隔符；第二位<'>表示可以手动输入单引号来分割拼音。
   algebra:
-    - erase/^xx$/
-    - derive/^([jqxy])u$/$1v/
-    - derive/^([aoe])([ioun])$/$1$1$2/
-    - xform/^([aoe])(ng)?$/$1$1$2/
-    - xform/iu$/Ⓠ/
-    - xform/(.)ei$/$1Ⓦ/
-    - xform/uan$/Ⓡ/
-    - xform/[uv]e$/Ⓣ/
-    - xform/un$/Ⓨ/
-    - xform/^sh/Ⓤ/
-    - xform/^ch/Ⓘ/
-    - xform/^zh/Ⓥ/
-    - xform/uo$/Ⓞ/
-    - xform/ie$/Ⓟ/
-    - xform/(.)i?ong$/$1Ⓢ/
-    - xform/ing$|uai$/Ⓚ/
-    - xform/(.)ai$/$1Ⓓ/
-    - xform/(.)en$/$1Ⓕ/
-    - xform/(.)eng$/$1Ⓖ/
-    - xform/[iu]ang$/Ⓛ/
-    - xform/(.)ang$/$1Ⓗ/
-    - xform/ian$/Ⓜ/
-    - xform/(.)an$/$1Ⓙ/
-    - xform/(.)ou$/$1Ⓩ/
-    - xform/[iu]a$/Ⓧ/
-    - xform/iao$/Ⓝ/
-    - xform/(.)ao$/$1Ⓒ/
-    - xform/ui$/Ⓥ/
-    - xform/in$/Ⓑ/
-    - xlit/ⓆⓌⓇⓉⓎⓊⒾⓄⓅⓈⒹⒻⒼⒽⒿⓀⓁⓏⓍⒸⓋⒷⓃⓂ/qwrtyuiopsdfghjklzxcvbnm/
-    # - abbrev/^(.).+$/$1/  # 首字母简拼，开启后会导致 3 个字母时 kj'x 变成 k'jx 的问题
+    __include: imr_config:/speller/algebra/imr_double
+
+# 万象
+grammar:
+  language: wanxiang-lts-zh-hans
+  collocation_max_length: 8
+  collocation_min_length: 3
+  collocation_penalty: -8
+  rear_penalty: -18
+
+aux:
+  trigger:
+    # default: '`'
+    learn: '`'
+    no_learn: '``'
+  db: imr_double_pinyin_aux_code
+  comment:
+    enable: true
+    db: imr_double_pinyin_aux_code
