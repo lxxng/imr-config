@@ -1,0 +1,8 @@
+patch:
+  schema_list:
+    - schema: imr_double
+    - schema: imr_t93
+  key_binder/bindings/+:
+    # 翻页 [ ]
+    - { when: has_menu, accept: bracketleft, send: Page_Up }
+    - { when: has_menu, accept: bracketright, send: Page_Down }
