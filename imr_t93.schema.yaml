@@ -33,8 +33,8 @@ schema:
     - melt_eng # 英文输入，作为次翻译器挂载到拼音方案
     - imr_t93_radical_pinyin
     - imr_t93_stroke
-    - ZRM_wanxiang
-    - ZRM_wanxiang_t93
+    - imr_t93_aux_code
+    - imr_double_pinyin_aux_code
 
 engine:
   processors:
