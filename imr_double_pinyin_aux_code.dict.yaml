@@ -8,5 +8,5 @@
 name: imr_double_pinyin_aux_code
 version: zzz
 import_tables:
-  - radical_dicts/ZRM_wanxiang
+  - radical_dicts/ZRM-wanxiang
 ...

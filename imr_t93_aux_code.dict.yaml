@@ -8,5 +8,5 @@
 name: imr_t93_aux_code
 version: zzz
 import_tables:
-  - radical_dicts/ZRM_wanxiang_t93
+  - radical_dicts/ZRM-wanxiang_t93
 ...
