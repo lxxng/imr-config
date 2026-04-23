@@ -49,7 +49,7 @@ recognizer:
   patterns:                             # 再增加方案专有的：
     calculator: "^=.+"                 # 响应 lua_translator@*calc_translator，计算器。前缀设定项 calculator/prefix
     radical_lookup: "^77[a-z]+$"        # 响应部件拆字的反查，触发前缀与 radical_lookup/prefix 匹配
-    user_lookup: "^77[1-9]+$"
+    user_lookup: "^77([12345689]+[qwert]?)+$"
 
 translator:
   prism: imr_numpad_t9
@@ -148,8 +148,6 @@ key_binder:
     - {accept: KP_Decimal, send: BackSpace, when: has_menu}
     - {accept: KP_Enter, send: Return, when: has_menu}
   import_preset: default
-menu:
-  page_size: 9
 speller:
   alphabet: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210
   initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210
@@ -248,3 +246,9 @@ radical_reverse_lookup:
   # comment_format:     # 自定义 comment，例如在左右加上括号
   #  - xform/^/(/
   #  - xform/$/)/
+
+# weasel
+style:
+  horizontal: false  # 候选项横排：true；false
+menu:
+  page_size: 9  # 候选词个数
