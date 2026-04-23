@@ -2,6 +2,7 @@ patch:
   schema_list:
     - schema: imr_double_pinyin
     - schema: imr_t93
+    - schema: imr_numpad_t9
   key_binder/bindings/+:
     # 翻页 [ ]
     - { when: has_menu, accept: bracketleft, send: Page_Up }

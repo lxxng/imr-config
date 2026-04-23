@@ -1,0 +1,14 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: imr_numpad_t9_radical_pinyin
+  name: 小键盘九键反查
+  version: alpha
+
+speller:
+  algebra:
+    - xform/'//
+translator:
+  prism: imr_numpad_t9_radical_pinyin
+  dictionary: imr_numpad_t9_radical_pinyin

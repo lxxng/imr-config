@@ -6,7 +6,8 @@ schema:
     PC小键盘九键输入方案
   dependencies:
     - melt_eng # 英文输入，作为次翻译器挂载到拼音方案
-    - imr_numpad_t9_radical
+    - imr_numpad_t9_radical_pinyin
+    - imr_numpad_t9_user
 
 engine:
   processors:
@@ -23,20 +24,22 @@ engine:
     - matcher
     - abc_segmentor
     - affix_segmentor@radical_lookup  # 部件拆字自定义 tag
+    - affix_segmentor@user_lookup
     - punct_segmentor
     - fallback_segmentor
   translators:
     - punct_translator
     - script_translator
     - lua_translator@*date_translator # 时间、日期、星期
-    - table_translator@custom_phrase # 自定义短语 custom_phrase_t9.txt
     # - table_translator@melt_eng     # 英文输入
     - table_translator@radical_lookup    # 部件拆字反查
+    - table_translator@user_lookup       # 自定义反查
     - lua_translator@*calc_translator    # 计算器
     - lua_translator@*force_gc           # 暴力 GC
   filters:
     - simplifier@emoji # Emoji
     - simplifier@traditionalize # 简繁切换
+    - reverse_lookup_filter@radical_reverse_lookup  # 部件拆字滤镜
     - uniquifier # 去重
 
 
@@ -45,7 +48,8 @@ recognizer:
   import_preset: default                # 从 default.yaml 继承通用的
   patterns:                             # 再增加方案专有的：
     calculator: "^=.+"                 # 响应 lua_translator@*calc_translator，计算器。前缀设定项 calculator/prefix
-    radical_lookup: "^77[a-z0-9']+$"        # 响应部件拆字的反查，触发前缀与 radical_lookup/prefix 匹配
+    radical_lookup: "^77[a-z]+$"        # 响应部件拆字的反查，触发前缀与 radical_lookup/prefix 匹配
+    user_lookup: "^77[1-9]+$"
 
 translator:
   prism: imr_numpad_t9
@@ -220,9 +224,26 @@ speller:
 # 部件拆字反查
 radical_lookup:
   tag: radical_lookup
-  dictionary: imr_numpad_t9_radical
+  dictionary: imr_numpad_t9_radical_pinyin
   enable_user_dict: false
   prefix: "77"  # 反查前缀（反查时前缀会消失影响打英文所以设定为两个字母，或可改成一个非字母符号），与 recognizer/patterns/radical_lookup 匹配
-  tips: "  〔??〕"
   comment_format:
     - erase/^.*$//
+
+user_lookup:
+  tag: user_lookup
+  dictionary: imr_numpad_t9_user
+  enable_user_dict: false
+  prefix: "77"  # 反查前缀（反查时前缀会消失影响打英文所以设定为两个字母，或可改成一个非字母符号），与 recognizer/patterns/radical_lookup 匹配
+  comment_format:
+    - erase/^.*$//
+
+# 部件拆字滤镜
+radical_reverse_lookup:
+  tags: [ user_lookup, radical_lookup ]
+  # dictionary 为拼音标注来源，目前是显示本方案词库的注音。
+  # 可去部件拆字方案下载更全的、带声调的、已编译好的词典： https://github.com/mirtlecn/rime-radical-pinyin#反查带声调注音
+  dictionary: wanxiang
+  # comment_format:     # 自定义 comment，例如在左右加上括号
+  #  - xform/^/(/
+  #  - xform/$/)/

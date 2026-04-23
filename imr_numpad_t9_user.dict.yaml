@@ -1,0 +1,18 @@
+
+# encoding: utf-8
+#
+# imr_numpad_t9的自定义反查
+# 
+#
+
+---
+name: imr_numpad_t9_user
+version: alpha-2025-2026
+use_preset_vocabulary: false
+...
+十	shí
+十一	shí'yi
+十二	shi'er
+一百一	yi'bai'yi
+一百二	yi'bai'er	
+一百	yi'bai

@@ -1,4 +1,3 @@
-
 # encoding: utf-8
 #
 # imr_numpad_t9的拼音反查
@@ -8,15 +7,9 @@
 #
 
 ---
-name: imr_numpad_t9_radical
+name: imr_numpad_t9_radical_pinyin
 version: alpha-2025-2026
 use_preset_vocabulary: false
 import_tables:
   - radical_dicts/radical_pinyin
 ...
-十	[shí]
-十一	[shí][yi]
-十二	[shi][er]
-一百一	[yi][bai][yi]	100
-一百二	[yi][bai][er]	1000
-一百	[yi][bai]	40

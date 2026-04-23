@@ -2,8 +2,7 @@
 # encoding: utf-8
 
 schema:
-  schema_id: imr_numpad_t9_radical
-  name: 小键盘九键反查
+  schema_id: imr_numpad_t9_user
   version: alpha
 
 speller:
@@ -68,4 +67,4 @@ speller:
     - xform/'|\[|\]//
     
 translator:
-  dictionary: imr_numpad_t9_radical
+  dictionary: imr_numpad_t9_user
