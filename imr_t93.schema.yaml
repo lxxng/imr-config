@@ -91,7 +91,7 @@ recognizer:
 
 translator:
   prism: imr_t93
-  dictionary: rime_ice
+  dictionary: wanxiang
   spelling_hints: none
   comment_format: []
 
@@ -122,8 +122,8 @@ punctuator:
     "#": [0, "#", "$", "%", "^", "&", "*", "(", ")"]
 
 speller:
-  alphabet: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210=`
-  initials: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210=
+  alphabet: 0123456789`abcde
+  initials: 0123456789
   algebra:
     __include: imr_config.yaml:/speller/algebra/imr_t93
 
@@ -148,7 +148,7 @@ stroke_lookup:
 # 拆字滤镜
 reverse_lookup:
   tags: [ radical_lookup, stroke_lookup ]
-  dictionary: rime_ice
+  dictionary: wanxiang
 
 # 万象
 grammar:
