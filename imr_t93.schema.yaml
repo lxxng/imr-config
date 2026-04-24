@@ -38,7 +38,6 @@ schema:
 
 engine:
   processors:
-    - t9_processor
     - lua_processor@*imr.t93_processor
     - lua_processor@*imr.select_char*Processor
     - ascii_composer
