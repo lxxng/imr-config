@@ -93,12 +93,12 @@ Object.keys(dicts).forEach(key => {
                 if (en && en.length >= 2) {
                     let en1 = en.charAt(0);
                     let en2 = en.charAt(1);
-                    let number = '';
-                    number += numbers[en1][0];
-                    number += numbers[en2][0];
-                    number += (numbers[en1][1] - 1) * 3
+                    let number1 = numbers[en1][0];
+                    let number2 = numbers[en2][0];
+                    let number3 = (numbers[en1][1] - 1) * 3
                         + (numbers[en2][1]);
-                    target_lines.push(`${cn}\t${number}`);
+                    target_lines.push(`${cn}\t${number1}${number2}${number3}`);
+                    target_lines.push(`${cn}\t${number1}${number2}0`);
                 }
             }
         }
