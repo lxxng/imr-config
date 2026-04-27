@@ -1,0 +1,11 @@
+# Rime dictionary
+# encoding: utf-8
+# ------- 用户 -------
+#
+# 词<Tab>拼音 拼音<Tab>权重
+#
+---
+name: user
+version: alpha
+sort: by_weight
+...
