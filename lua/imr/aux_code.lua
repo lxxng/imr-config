@@ -1,3 +1,34 @@
+local function to_string(x, seen)
+    seen = seen or {} -- 用于检测循环引用
+    local t = type(x)
+
+    if t == "nil" then
+        return "nil"
+    elseif t == "boolean" then
+        return x and "true" or "false"
+    elseif t == "number" then
+        return tostring(x)
+    elseif t == "string" then
+        return string.format("%q", x) -- 加双引号并转义内部字符
+    elseif t == "table" then
+        if seen[x] then
+            return "<循环引用>"
+        end
+        seen[x] = true
+        local parts = {}
+        for k, v in pairs(x) do
+            -- 键的表示：字符串加引号，其他直接 tostring
+            local key_str = (type(k) == "string") and string.format("%q", k) or tostring(k)
+            local val_str = to_string(v, seen)
+            table.insert(parts, key_str .. " = " .. val_str)
+        end
+        seen[x] = nil -- 清理，避免影响同级其他分支（可选）
+        return "{" .. table.concat(parts, ", ") .. "}"
+    else
+        -- function, thread, userdata 等类型
+        return "<" .. t .. ": " .. tostring(x) .. ">"
+    end
+end
 local AuxFilter = {}
 local parse_aux_input
 
@@ -185,22 +216,27 @@ local function is_multi_char_text(text)
     return false
 end
 
-local function append_phrase_match_hint(cand, matched_char, auxStr)
-    local hint = "(" .. matched_char .. ":" .. auxStr .. ")"
-
-    if cand:get_dynamic_type() == "Shadow" then
-        local shadow_text = cand.text
-        local shadow_comment = cand.comment or ""
-        local original = cand:get_genuine()
-        if not original then
-            cand.comment = merge_comment(cand.comment, hint)
-            return cand
-        end
-        local merged = merge_comment((original.comment or "") .. shadow_comment, hint)
-        return ShadowCandidate(original, original.type, shadow_text, merged)
+local function append_comment(cand, auxCodes, char)
+    local comment = auxCodes:gsub(' ', ',')
+    if char ~= '' then
+        comment = char .. ':' .. comment
     end
-
-    cand.comment = merge_comment(cand.comment, hint)
+    comment = '(' .. comment .. ')'
+    -- 处理 simplifier
+    if cand:get_dynamic_type() == 'Shadow' then
+        local shandow_cand = cand
+        local original_cand = cand:get_genuine()
+        if not original_cand then
+            cand.comment = merge_comment(cand.comment, comment)
+            return
+        end
+        return ShadowCandidate(
+            original_cand,
+            original_cand.type, shandow_cand.text,
+            (original_cand.comment or '') .. shandow_cand.comment .. comment
+        )
+    end
+    cand.comment = merge_comment(cand.comment, comment)
     return cand
 end
 
@@ -268,40 +304,33 @@ function AuxFilter.func(input, env)
     -- 遍歷每一個待選項
     for _cand in input:iter() do
         local cand = _cand
-        local auxCodes = AuxFilter.comment_db:lookup(cand.text) -- 僅單字非 nil
-
-        -- 查看 auxCodes
-        -- log.info(cand.text, #auxCodes)
-        -- for i, cl in ipairs(auxCodes) do
-        --     log.info(i, table.concat(cl, ',', 1, #cl))
-        -- end
-
-        -- 給待選項加上輔助碼提示
-        if env.show_comment and auxCodes and #auxCodes > 0 then
-            local codeComment = auxCodes:gsub(' ', ',')
-            -- 處理 simplifier
-            if cand:get_dynamic_type() == "Shadow" then
-                local shadowText = cand.text
-                local shadowComment = cand.comment
-                local originalCand = cand:get_genuine()
-                cand = ShadowCandidate(originalCand, originalCand.type, shadowText,
-                    originalCand.comment .. shadowComment .. '(' .. codeComment .. ')')
-            else
-                cand.comment = '(' .. codeComment .. ')'
-            end
-        end
 
         -- 過濾輔助碼
         if #auxStr == 0 then
-            -- 沒有輔助碼、不需篩選，直接返回待選項
-            yield(to_yield_candidate(cand))
+            -- 没有辅助码，加一下提示，直接返回
+            if env.show_comment then
+                local hint_char, lookup_char
+                if is_multi_char_text(cand.text) then
+                    lookup_char = utf8.char(utf8.codepoint(cand.text, 1))
+                    hint_char = lookup_char
+                else
+                    lookup_char = cand.text
+                    hint_char = ''
+                end
+                local auxCodes = AuxFilter.comment_db:lookup(lookup_char)
+                cand = append_comment(cand, auxCodes, hint_char)
+            end
+            yield((to_yield_candidate(cand)))
         elseif #auxStr > 0 and is_phrase_candidate(cand) then
             local matched = find_phrase_match(cand.text, auxStr)
             -- 仅词组候选显示命中提示，单字继续沿用“显示全部辅码”。
-            if matched and env.show_comment and is_multi_char_text(cand.text) then
-                -- 当前单字的辅助码提示
+            if matched and env.show_comment then
                 local auxCodes = AuxFilter.comment_db:lookup(matched.char)
-                cand = append_phrase_match_hint(cand, matched.char, auxCodes)
+                local hint_char = ''
+                if is_multi_char_text(cand.text) then
+                    hint_char = matched.char
+                end
+                cand = append_comment(cand, auxCodes, hint_char)
             end
 
             if matched and matched.pos == 1 then
@@ -335,7 +364,6 @@ function AuxFilter.func(input, env)
     --     yield(cand)
     -- end
     -- 更新逻辑：没有匹配上就不出现再候选框里，提升性能
-
 end
 
 function AuxFilter.fini(env)
