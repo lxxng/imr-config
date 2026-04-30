@@ -50,7 +50,8 @@ local Processor = {
                     context:push_input(key_repr)
                     return 1
                 end
-                if text == '' and context.input:sub(#context.input, #context.input):match('[a-e]') then
+                -- 如果前面是声调，这次输入就是更改声调
+                if text == '' and context.input:sub(context.caret_pos, context.caret_pos):match('[a-e]') then
                     context:pop_input(1)
                     context:push_input(key_repr)
                     return 1
