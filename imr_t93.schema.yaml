@@ -161,6 +161,7 @@ aux:
     learn: '`'
     no_learn: '``'
   db: imr_t93_aux_code
+  length: 3
   comment:
     enable: true
     db: imr_double_pinyin_aux_code

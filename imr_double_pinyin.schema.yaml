@@ -308,6 +308,7 @@ aux:
     learn: '`'
     no_learn: '``'
   db: imr_double_pinyin_aux_code
+  length: 2
   comment:
     enable: true
     db: imr_double_pinyin_aux_code

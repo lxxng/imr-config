@@ -1,3 +1,13 @@
+utf8.char_at = function(s, n)
+    if n <= 0 then return nil end
+    local start = utf8.offset(s, n)      -- 第 n 个字符的起始字节位置
+    if not start then return nil end     -- n 超出字符串长度
+    local next_start = utf8.offset(s, n + 1)  -- 下一个字符起始位置
+    if not next_start then
+        next_start = #s + 1              -- 最后一个字符截取到结尾
+    end
+    return s:sub(start, next_start - 1)
+end
 local function to_string(x, seen)
     seen = seen or {} -- 用于检测循环引用
     local t = type(x)
@@ -74,7 +84,7 @@ function AuxFilter.init(env)
         { mode = "no_learn", token = env.no_learn_trigger },
         { mode = "learn", token = env.learn_trigger },
     }
-    env.length = 2
+    env.length = config:get_int('aux/length') or 2
 
     local active_triggers = {}
     for _, item in ipairs(env.triggers) do
@@ -102,14 +112,15 @@ function AuxFilter.init(env)
     -- 持續選詞上屏，保持輔助碼分隔符存在 --
     ----------------------------
     env.notifier = engine.context.select_notifier:connect(function(ctx)
-        local mode, _, trigger_token = parse_aux_input(ctx.input, env)
+        local input = ctx.input
+        local mode, _, trigger_token = parse_aux_input(input, env)
         if mode == "none" then
             return
         end
 
         local preedit = ctx:get_preedit()
         local trigger_pattern = trigger_token:gsub("%W", "%%%1")
-        local removeAuxInput = ctx.input:match("([^,]+)" .. trigger_pattern)
+        local removeAuxInput = input:match("([^,]+)" .. trigger_pattern)
         local reeditTextFront = preedit.text:match("([^,]+)" .. trigger_pattern)
 
         if not removeAuxInput then
@@ -135,6 +146,16 @@ function AuxFilter.init(env)
         if reeditTextFront and reeditTextFront:match("[a-z0-9]") then
             -- 給詞尾自動添加分隔符，上面的 re.match 會把分隔符刪掉
             ctx.input = ctx.input .. trigger_token
+
+            -- -- 保留剩余辅码
+            -- 无法获取本次消耗的辅码，暂时取消这个功能
+            -- -- trigger前是 选中的字+剩余的字母，提取 选中的字 到cn_char
+            -- local cn_char = reeditTextFront:gsub('[a-z0-9]', '')
+            -- -- 选中的字对应的辅码长度，aux_count是消耗的辅码的数量
+            -- local aux_count = utf8.len(cn_char) * env.length
+            -- -- 匹配分隔符后的内容，应是辅码（本次消耗的辅码+剩余的辅码）
+            -- local right_text = input:match('[^,]+' .. trigger_pattern .. '([^,]+)')
+            -- ctx.input = ctx.input .. right_text:sub(aux_count + 1)
         else
             -- 剩下的直接上屏
             ctx:commit()
@@ -179,21 +200,28 @@ end
 
 -- 词组匹配按字位逐个检查，命中即返回。
 -- 这样只允许同一个字完整命中，避免旧逻辑跨字混拼误命中。
-local function find_phrase_match(word, auxStr)
+local function find_phrase_match(word, _auxStr, length)
+    local auxStr = _auxStr
+
     if auxStr == "" or not word or word == "" then
         return nil
     end
 
-    local pos = 0
+    local match_count = 0
     for _, codePoint in utf8.codes(word) do
-        pos = pos + 1
         local char = utf8.char(codePoint)
-        if char_matches_aux(char, auxStr) then
-            return { pos = pos, char = char }
+        local this_aux = auxStr:sub(1, length)
+        auxStr = auxStr:sub(#this_aux + 1)
+        if not char_matches_aux(char, this_aux) then
+            return 0
+        end
+        match_count = match_count + 1
+        if #auxStr == 0 then
+            return match_count
         end
     end
-
-    return nil
+    -- return match_count -- 持续上屏，因此如果输入的辅码比候选多，还是会保留候选（应处理，选完保留剩余辅码（现在做不到））
+    return 0  -- 不持续上屏，因此如果输入的辅码比候选多，则不显示这个候选（uiui`yuyu，只匹配uiui不会匹配ui'ui的第一个ui）
 end
 
 local function is_phrase_candidate(cand)
@@ -322,22 +350,24 @@ function AuxFilter.func(input, env)
             end
             yield((to_yield_candidate(cand)))
         elseif #auxStr > 0 and is_phrase_candidate(cand) then
-            local matched = find_phrase_match(cand.text, auxStr)
+            local matched_count = find_phrase_match(cand.text, auxStr, env.length)
             -- 仅词组候选显示命中提示，单字继续沿用“显示全部辅码”。
-            if matched and env.show_comment then
-                local auxCodes = AuxFilter.comment_db:lookup(matched.char)
+            if matched_count > 0 and env.show_comment then
+                local lookup_char = utf8.char_at(cand.text, matched_count)
+                assert(lookup_char)
+                local auxCodes = AuxFilter.comment_db:lookup(lookup_char)
                 local hint_char = ''
                 if is_multi_char_text(cand.text) then
-                    hint_char = matched.char
+                    hint_char = lookup_char
                 end
                 cand = append_comment(cand, auxCodes, hint_char)
+                table.insert(first_exact_bucket, cand)
             end
 
-            if matched and matched.pos == 1 then
-                table.insert(first_exact_bucket, cand)
-            elseif matched then
-                table.insert(full_aux_bucket, cand)
-            end
+            -- if matched and matched.pos == 1 then
+            -- elseif matched then
+                -- table.insert(full_aux_bucket, cand)
+            -- end
         else
             -- 待选项字词 没有 匹配到当前的辅助码，插入到列表中，最后插入到候选框里( 获得靠后的位置 )
             -- table.insert(insertLater, cand)
