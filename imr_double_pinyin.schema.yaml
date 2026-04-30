@@ -53,6 +53,7 @@ switches:
 engine:
   processors:
     - lua_processor@*imr.select_char*Processor
+    - lua_processor@*imr.double_pinyin_processor
     - ascii_composer
     - recognizer
     - key_binder

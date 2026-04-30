@@ -29,6 +29,7 @@ local Processor = {
             and (context:is_composing() or context:has_menu())
         then
             local key_repr = key:repr()
+            -- 前面是完整拼音，后面输入的第一个0视为`
             if key_repr == '0' then
                 local text = ignore_word(context.input)
                 if text == '' or text == '`' then
@@ -36,6 +37,7 @@ local Processor = {
                     return 1
                 end
             end
+            -- 输入的是声调，如果前面的拼音不完整，自动补零
             if key_repr:match('^[a-e]$') then
                 local text = ignore_word(context.input)
                 if text:match('^[1-9]$') then
@@ -51,6 +53,22 @@ local Processor = {
                 if text == '' and context.input:sub(#context.input, #context.input):match('[a-e]') then
                     context:pop_input(1)
                     context:push_input(key_repr)
+                    return 1
+                end
+            end
+
+            -- 辅码模式处理，允许tab后输入/删除辅码
+            if context.input:match('`') then
+                if key_repr:match('^[0-9]$') then
+                    local caret_pos = context.caret_pos == #context.input and #context.input + 1 or context.caret_pos
+                    context.input = context.input .. key_repr
+                    context.caret_pos = caret_pos
+                    return 1
+                end
+                if key_repr == 'BackSpace' then
+                    local caret_pos = context.caret_pos == #context.input and #context.input + 1 or context.caret_pos
+                    context.input = context.input:sub(1, #context.input - 1)
+                    context.caret_pos = caret_pos
                     return 1
                 end
             end
